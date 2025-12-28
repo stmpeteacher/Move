@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Classroom Card Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: Arial, sans-serif; background:#f0f2f5; text-align:center; padding:10px;}
+    .player { border:2px solid #ccc; padding:10px; margin:10px; border-radius:8px; background:white;}
+    .active { border-color:#2ecc71; background:#eafff2;}
+    button { padding:10px 16px; font-size:16px; margin:8px; }
+    .cards { font-size:20px; }
+  </style>
+</head>
+<body>
+
+<h1>Classroom Card Game</h1>
+
+<div id="setup">
+  <p>Select number of players:</p>
+  <select id="playerCount">
+    <option>2</option>
+    <option>3</option>
+    <option>4</option>
+  </select>
+  <br><br>
+  <button onclick="startGame()">Start Game</button>
+</div>
+
+<div id="game" style="display:none;">
+  <h2 id="turnIndicator"></h2>
+  <button onclick="drawCard()">Draw Card</button>
+  <div id="players"></div>
+</div>
+
+<script>
+let players = [];
+let currentPlayer = 0;
+let deck = [];
+
+function startGame() {
+  const count = parseInt(document.getElementById("playerCount").value);
+  players = [];
+  for (let i = 0; i < count; i++) {
+    players.push({ score: 0, cards: [] });
+  }
+  deck = createDeck();
+  shuffle(deck);
+  currentPlayer = 0;
+
+  document.getElementById("setup").style.display = "none";
+  document.getElementById("game").style.display = "block";
+  render();
+}
+
+function createDeck() {
+  let d = [];
+  for (let i = 1; i <= 40; i++) {
+    d.push(Math.ceil(Math.random() * 10) * 5); // values 5–50
+  }
+  return d;
+}
+
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
+function drawCard() {
+  if (deck.length === 0) return alert("Deck is empty!");
+  const card = deck.pop();
+  players[currentPlayer].cards.push(card);
+  players[currentPlayer].score += card;
+
+  if (players[currentPlayer].score >= 200) {
+    alert(`Player ${currentPlayer + 1} wins with ${players[currentPlayer].score} points!`);
+    location.reload();
+    return;
+  }
+
+  currentPlayer = (currentPlayer + 1) % players.length;
+  render();
+}
+
+function render() {
+  document.getElementById("turnIndicator").textContent =
+    `Player ${currentPlayer + 1}'s Turn`;
+
+  const container = document.getElementById("players");
+  container.innerHTML = "";
+
+  players.forEach((p, i) => {
+    const div = document.createElement("div");
+    div.className = "player" + (i === currentPlayer ? " active" : "");
+    div.innerHTML = `
+      <h3>Player ${i + 1}</h3>
+      <p>Score: ${p.score}</p>
+      <div class="cards">Cards: ${p.cards.join(", ") || "None"}</div>
+    `;
+    container.appendChild(div);
+  });
+}
+</script>
+
+</body>
+</html>
